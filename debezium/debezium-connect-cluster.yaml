@@ -1,0 +1,26 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: debezium-connect-cluster
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.7.0
+  image: thongle0610/osds-debezium:v0.1
+  replicas: 1
+  bootstrapServers: osds-cluster-kafka-bootstrap:9092
+  config:
+    config.providers: secrets
+    config.providers.secrets.class: io.strimzi.kafka.KubernetesSecretConfigProvider
+    group.id: connect-cluster
+    offset.storage.topic: connect-cluster-offsets
+    config.storage.topic: connect-cluster-configs
+    status.storage.topic: connect-cluster-status
+    # -1 means it will use the default replication factor configured in the broker
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
+
+    # security.protocol: SASL_PLAINTEXT
+    # sasl.mechanism: SCRAM-SHA-256
+    # sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username= "user1" password="$(kubectl get secret kafka-user-passwords --namespace debezium-kafka -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d , -f 1)";

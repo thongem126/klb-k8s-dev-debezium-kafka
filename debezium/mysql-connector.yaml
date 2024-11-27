@@ -1,0 +1,28 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: debezium-connector-mysql
+  labels:
+    strimzi.io/cluster: debezium-connect-cluster
+spec:
+  class: io.debezium.connector.mysql.MySqlConnector
+  tasksMax: 1
+  config:
+    tasks.max: 1
+    database.hostname: mysql
+    database.port: 3306
+    database.user: ${secrets:kafka/debezium-secret:username}
+    database.password: ${secrets:kafka/debezium-secret:password}
+    database.server.id: 184054
+    topic.prefix: mysql
+    database.include.list: thongdb
+    schema.history.internal.kafka.bootstrap.servers: osds-cluster-kafka-bootstrap:9092
+    schema.history.internal.kafka.topic: schema-changes.inventory
+    database.server.name: mysql_server
+    database.history.kafka.bootstrap.servers: osds-cluster-kafka-bootstrap:9092
+    database.history.producer.bootstrap.servers: osds-cluster-kafka-bootstrap:9092
+    database.history.consumer.bootstrap.servers: osds-cluster-kafka-bootstrap:9092
+    database.connection.url: "jdbc:mysql://db:3306/thongdb?allowPublicKeyRetrieval=true&useSSL=false"
+    # security.protocol: SASL_PLAINTEXT
+    # sasl.mechanism: SCRAM-SHA-256
+    # sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username= "user1" password="$(kubectl get secret kafka-user-passwords --namespace debezium-kafka -o jsonpath='{.data.client-passwords}' | base64 -d | cut -d , -f 1)";
